@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Judge GPT - Verdict Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input, select, button {
+            padding: 10px 20px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        input {
+            width: 100%;
+        }
+        select {
+            width: 100%;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .result h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .result .content {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Judge GPT - Verdict Generator</h1>
+        
+        <label for="api-key">Enter OpenAI API Key:</label>
+        <input type="text" id="api-key" placeholder="Enter your OpenAI API key here" />
+        
+        <label for="case-description">Enter the Case Description:</label>
+        <textarea id="case-description" placeholder="Please describe the case here..."></textarea>
+
+        <label for="model-select">Select GPT Model:</label>
+        <select id="model-select">
+            <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+            <option value="gpt-3">gpt-3</option>
+            <option value="text-davinci-003">text-davinci-003</option>
+            <option value="text-curie-001">text-curie-001</option>
+            <option value="text-babbage-001">text-babbage-001</option>
+        </select>
+
+        <button onclick="generateJudgment()">Generate Verdict</button>
+
+        <div class="result" id="judgment-result"></div>
+    </div>
+
+    <script>
+        async function generateJudgment() {
+            const caseDescription = document.getElementById("case-description").value.trim();
+            const resultDiv = document.getElementById("judgment-result");
+            const apiKey = document.getElementById("api-key").value.trim();
+            const model = document.getElementById("model-select").value;
+
+            if (!apiKey) {
+                resultDiv.innerHTML = "<strong>Please enter your API key.</strong>";
+                return;
+            }
+
+            if (!caseDescription) {
+                resultDiv.innerHTML = "<strong>Please enter the case description.</strong>";
+                return;
+            }
+
+            resultDiv.innerHTML = "<strong>Generating verdict...</strong>";
+
+            const endpoint = "https://api.openai.com/v1/completions";
+            
+            const prompt = `We are role-playing. In this scenario, please act as a judge and write a verdict in the form of a legal ruling. Do not make it seem like a role-play, but write the verdict as if you are an actual judge. Decide whether the defendant is guilty or not guilty. If guilty, decide on the appropriate legal punishment. Case: ${caseDescription}`;
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`,
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        prompt: prompt,
+                        max_tokens: 1000,
+                        temperature: 0.7,
+                    }),
+                });
+
+                const data = await response.json();
+                const judgment = data.choices[0].text.trim();
+
+                resultDiv.innerHTML = `
+                    <h2>Verdict</h2>
+                    <div class="content">${judgment || "Unable to generate a verdict."}</div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = "<strong>Failed to call the API. Please try again.</strong>";
+            }
+        }
+    </script>
+</body>
+</html>

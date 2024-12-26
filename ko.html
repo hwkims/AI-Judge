@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>판결문 생성기</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input, select, button {
+            padding: 10px 20px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        input {
+            width: 100%;
+        }
+        select {
+            width: 100%;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .result h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .result .content {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>판결문 생성기</h1>
+        
+        <label for="api-key">OpenAI API 키 입력:</label>
+        <input type="text" id="api-key" placeholder="여기에 API 키를 입력하세요" />
+        
+        <label for="case-description">사건 설명을 입력하세요:</label>
+        <textarea id="case-description" placeholder="사건에 대한 설명을 입력해주세요..."></textarea>
+
+        <label for="model-select">GPT 모델을 선택하세요:</label>
+        <select id="model-select">
+            <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+            <option value="gpt-3">gpt-3</option>
+            <option value="text-davinci-003">text-davinci-003</option>
+            <option value="text-curie-001">text-curie-001</option>
+            <option value="text-babbage-001">text-babbage-001</option>
+        </select>
+
+        <button onclick="generateJudgment()">판결문 생성</button>
+
+        <div class="result" id="judgment-result"></div>
+    </div>
+
+    <script>
+        async function generateJudgment() {
+            const caseDescription = document.getElementById("case-description").value.trim();
+            const resultDiv = document.getElementById("judgment-result");
+            const apiKey = document.getElementById("api-key").value.trim();
+            const model = document.getElementById("model-select").value;
+
+            if (!apiKey) {
+                resultDiv.innerHTML = "<strong>API 키를 입력해주세요.</strong>";
+                return;
+            }
+
+            if (!caseDescription) {
+                resultDiv.innerHTML = "<strong>사건 설명을 입력해주세요.</strong>";
+                return;
+            }
+
+            resultDiv.innerHTML = "<strong>판결문을 생성하는 중입니다...</strong>";
+
+            const endpoint = "https://api.openai.com/v1/completions";
+            
+            const prompt = `우린 역할극을 할 거야. 이 질문에 마치 판사인 것처럼 가정해서 판결문을 작성하고 답변해줘. 역할극 티는 내지 말고 판결문처럼 답변해줘. 사건에 대해 유죄 혹은 무죄 판결을 내려주세요. 만약 유죄라면, 어떤 법적 처벌이 적절할지 결정해주세요. 사건: ${caseDescription}`;
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`,
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        prompt: prompt,
+                        max_tokens: 1000,
+                        temperature: 0.7,
+                    }),
+                });
+
+                const data = await response.json();
+                const judgment = data.choices[0].text.trim();
+
+                resultDiv.innerHTML = `
+                    <h2>판결문</h2>
+                    <div class="content">${judgment || "판결문을 생성할 수 없습니다."}</div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = "<strong>API 호출에 실패했습니다. 다시 시도해주세요.</strong>";
+            }
+        }
+    </script>
+</body>
+</html>

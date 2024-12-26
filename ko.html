@@ -98,6 +98,7 @@
             <option value="text-davinci-003">text-davinci-003</option>
             <option value="text-curie-001">text-curie-001</option>
             <option value="text-babbage-001">text-babbage-001</option>
+            <option value="gpt-4">gpt-4</option>
         </select>
 
         <button onclick="generateJudgment()">판결문 생성</button>
@@ -124,9 +125,18 @@
 
             resultDiv.innerHTML = "<strong>판결문을 생성하는 중입니다...</strong>";
 
-            const endpoint = "https://api.openai.com/v1/completions";
+            const endpoint = "https://api.openai.com/v1/chat/completions";
             
-            const prompt = `우린 역할극을 할 거야. 이 질문에 마치 판사인 것처럼 가정해서 판결문을 작성하고 답변해줘. 역할극 티는 내지 말고 판결문처럼 답변해줘. 사건에 대해 유죄 혹은 무죄 판결을 내려주세요. 만약 유죄라면, 어떤 법적 처벌이 적절할지 결정해주세요. 사건: ${caseDescription}`;
+            const messages = [
+                {
+                    role: "system",
+                    content: "너는 유능한 판사로서 판결문을 작성해야 합니다."
+                },
+                {
+                    role: "user",
+                    content: `사건: ${caseDescription}`
+                }
+            ];
 
             try {
                 const response = await fetch(endpoint, {
@@ -137,14 +147,14 @@
                     },
                     body: JSON.stringify({
                         model: model,
-                        prompt: prompt,
+                        messages: messages,
                         max_tokens: 1000,
                         temperature: 0.7,
                     }),
                 });
 
                 const data = await response.json();
-                const judgment = data.choices[0].text.trim();
+                const judgment = data.choices[0].message.content.trim();
 
                 resultDiv.innerHTML = `
                     <h2>판결문</h2>

@@ -79,6 +79,12 @@
             line-height: 1.6;
             margin-top: 10px;
         }
+        .loading {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #007BFF;
+        }
     </style>
 </head>
 <body>
@@ -103,7 +109,8 @@
 
         <button onclick="generateJudgment()">판결문 생성</button>
 
-        <div class="result" id="judgment-result"></div>
+        <div id="judgment-result" class="result"></div>
+        <div id="loading" class="loading" style="display: none;">판결문을 생성하는 중입니다...</div>
     </div>
 
     <script>
@@ -112,18 +119,23 @@
             const resultDiv = document.getElementById("judgment-result");
             const apiKey = document.getElementById("api-key").value.trim();
             const model = document.getElementById("model-select").value;
+            const loadingDiv = document.getElementById("loading");
+
+            // 초기화
+            resultDiv.innerHTML = "";
+            loadingDiv.style.display = "block";
 
             if (!apiKey) {
                 resultDiv.innerHTML = "<strong>API 키를 입력해주세요.</strong>";
+                loadingDiv.style.display = "none";
                 return;
             }
 
             if (!caseDescription) {
                 resultDiv.innerHTML = "<strong>사건 설명을 입력해주세요.</strong>";
+                loadingDiv.style.display = "none";
                 return;
             }
-
-            resultDiv.innerHTML = "<strong>판결문을 생성하는 중입니다...</strong>";
 
             const endpoint = "https://api.openai.com/v1/chat/completions";
             
@@ -148,10 +160,14 @@
                     body: JSON.stringify({
                         model: model,
                         messages: messages,
-                        max_tokens: 1000,
-                        temperature: 0.7,
+                        max_tokens: 1000,  // 최대 토큰 설정
+                        temperature: 0.7,   // 출력의 창의성 설정
                     }),
                 });
+
+                if (!response.ok) {
+                    throw new Error("API 요청이 실패했습니다.");
+                }
 
                 const data = await response.json();
                 const judgment = data.choices[0].message.content.trim();
@@ -162,6 +178,8 @@
                 `;
             } catch (error) {
                 resultDiv.innerHTML = "<strong>API 호출에 실패했습니다. 다시 시도해주세요.</strong>";
+            } finally {
+                loadingDiv.style.display = "none"; // 로딩 표시 숨기기
             }
         }
     </script>

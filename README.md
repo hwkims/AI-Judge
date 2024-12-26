@@ -1,4 +1,7 @@
-감사합니다! 주신 링크는 한국어 버전 페이지에 해당하는 URL로 보입니다. 이를 바탕으로 한국어 버전의 **README.md** 파일을 업데이트하여, 사용자가 해당 한국어 페이지로도 쉽게 접근할 수 있도록 안내할 수 있습니다.
+![image](https://github.com/user-attachments/assets/60fd3eff-fe51-4917-b90e-b87fa62c17ca)
+![image](https://github.com/user-attachments/assets/9106b157-22ac-476c-990e-fa0a135eda87)
+
+ 이를 바탕으로 한국어 버전의 **README.md** 파일을 업데이트하여, 사용자가 해당 한국어 페이지로도 쉽게 접근할 수 있도록 안내할 수 있습니다.
 
 다음은 한국어 버전의 GitHub **README.md** 파일 업데이트입니다.
 
